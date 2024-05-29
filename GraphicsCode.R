@@ -31,6 +31,9 @@ cultch$Harvest<-replace(cultch$Harvest, cultch$Harvest=='N', "No")
 #subsetting datasets
 SRCultch = cultch[which(cultch$Region == 'Salt Run'),]
 MRCultch = cultch[which(cultch$Region == 'Matanzas River'),]
+SROys = data[which(data$Region == 'Salt Run'),]
+MROys = data[which(data$Region == 'Matanzas River'),]
+TROys = data[which(data$Region == 'Tolomato River'),]
 Sh2v = c('Region', 'Harvest', 'Shell')
 spat = Sh[which(Sh$Class == 'Spat'),]
 SRSH = Sh[which(Sh$Region == 'Salt Run'),]
@@ -42,6 +45,7 @@ SRSHYes = SRSH[which(SRSH$Harvest == 'Yes'),]
 SRSHNo = SRSH[which(SRSH$Harvest == 'No'),]
 MRSHYes = MRSH[which(MRSH$Harvest == 'Yes'),]
 MRSHNo = MRSH[which(MRSH$Harvest == 'No'),]
+
 
 
 #making factors
@@ -80,8 +84,12 @@ a_oys = data %>%
         legend.position = "none", panel.background = element_blank(),
                                          plot.title = element_text(hjust = 0.5)) +
   labs(x = "Harvest", y = bquote(Density~(Oysters/0.0625~m^2)))+ facet_wrap(~Region) +
-  theme(panel.spacing = unit(0, 'lines')) +  ggtitle("Oyster Density by Region")
+  theme(panel.spacing = unit(0, 'lines')) +  ggtitle("Oyster Density by Region") 
 
+ann_text <- data.frame(Harvest = 'No',Oys = 400,lab = "ab",
+                       Region = factor('Matanzas River',levels = c("Matanzas River","Salt Run","Tolomato River")))
+
+a_oys + geom_text(data = ann_text,label = "ab")
 a_oys 
 
 a_mus = data %>% 
@@ -189,14 +197,15 @@ glmm_oys2 = glmer.nb(Oys ~ Harvest + (1|ReefID) + (1|Region) + (1|Sample), data 
 glmm_oys3 = glmer.nb(Oys ~ Harvest + (1|ReefID), data = data) #3277.8
 glmm_oys4 = glmer.nb(Oys ~ Harvest + (1|Region), data = data) #3333.3
 glmm_oys5 = glmer.nb(Oys ~ Harvest * Region + (1|ReefID), data = data) #3263.6
+glmm_oys6 = glmer.nb(Oys ~ Harvest * Region + (1|ReefID) + (1|Sample), data = data)
 plot(glmm_oys5)
 
 #estimated marginal means
-AIC(glmm_oys1, glmm_oys2, glmm_oys3, glmm_oys4, glmm_oys5)
-m.region <- emmeans(glmm_oys5, ~ Region)
+AIC(glmm_oys1, glmm_oys2, glmm_oys3, glmm_oys4, glmm_oys5, glmm_oys6)
+m.region <- emmeans(glmm_oys6, ~ Region)
 
-Anova(glmm_oys5)
-summary(glmm_oys5)
+Anova(glmm_oys6)
+summary(glmm_oys6)
 
 res <- DHARMa::simulateResiduals(glmm_oys5)
 plot(res)
@@ -207,6 +216,31 @@ performance::check_autocorrelation(glmm_oys5) # Durbin-Watson-Test to test for a
 
 contrast(m.region, method = 'pairwise', adjust = 'tukey')
 plot(m.region, comparisons = T)
+
+#site specific oys density comparisons -- Salt Run
+glmm_oysSR = lmer(Oys ~ Harvest + (1|ReefID), 
+                    data = SROys)
+summary(glmm_oysSR)
+Anova(glmm_oysSR)
+SRc.region <- emmeans(glmm_oysSR, ~ Harvest)
+contrast(SRc.region, method = 'pairwise', adjust = 'tukey')
+
+#site specific oyster density comparisons -- Tolomato River
+glmm_oysTR = lmer(Oys ~ Harvest + (1|ReefID), 
+                  data = TROys)
+summary(glmm_oysTR)
+Anova(glmm_oysTR)
+TRo.harvest <- emmeans(glmm_oysTR, ~ Harvest)
+contrast(TRo.harvest, method = 'pairwise', adjust = 'tukey')
+
+#site specific oyster density comparisons -- Matanzas River
+glmm_oysMR = lmer(Oys ~ Harvest + (1|ReefID), 
+                  data = MROys)
+summary(glmm_oysMR)
+Anova(glmm_oysMR)
+MRo.harvest <- emmeans(glmm_oysMR, ~ Harvest)
+contrast(MRo.harvest, method = 'pairwise', adjust = 'tukey')
+
 # blue bars are the confidence intervals
 # red arrows represent a scheme to determine homogeneous groups
 # if the red lines overlap for two groups, they are not significantly different using the method chosen

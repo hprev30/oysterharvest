@@ -9,8 +9,10 @@ library(performance)
 library(emmeans)
 library(estimability)
 library(readr)
+library(ggsignif)
 install.packages('estimability')
 install.packages('readr')
+install.packages('ggsignif')
 
 ##### data----
 #reading in data
@@ -48,12 +50,16 @@ MRSHNo = MRSH[which(MRSH$Harvest == 'No'),]
 
 
 
+
 #making factors
 data$Harvest = as.factor(data$Harvest)
 data$Region = as.factor(data$Region)
 
 
 ##### making means------
+
+data$Oys = data$Oys*16 #scaling up to a meter squared
+data$Mus = data$Mus*16
 means_oys = data %>% group_by(Harvest, Region) %>%
   summarize(mean = mean(Oys, na.rm = T))
 means_mus = data %>% group_by(Harvest, Region) %>%
@@ -76,21 +82,32 @@ a_oys = data %>%
   geom_point(data = means_oys, aes(x = Harvest, y = mean, size = 4)) +
   scale_color_manual(values = harvest_colors) +
   ggrepel::geom_label_repel(data = means_oys, aes(x = Harvest, y = mean, 
-                                              label = round(mean, digits = 2),
-                                              family = "times new roman"), size = 3.3,
+                                                  label = round(mean, digits = 2),
+                                                  family = "times new roman"), size = 3.3,
                             nudge_y = 2.5, nudge_x = 0.2, color = "black") +
-  theme_bw(base_family = "serif") +
+  theme_bw(base_family = "TT Times New Roman") +
   theme(axis.text = element_text(color = "black"),
         legend.position = "none", panel.background = element_blank(),
                                          plot.title = element_text(hjust = 0.5)) +
-  labs(x = "Harvest", y = bquote(Density~(Oysters/0.0625~m^2)))+ facet_wrap(~Region) +
+  labs(x = "In Harvest Zone?", y = bquote(Density~(Oysters/m^2)))+ facet_wrap(~Region) +
   theme(panel.spacing = unit(0, 'lines')) +  ggtitle("Oyster Density by Region") 
 
-ann_text <- data.frame(Harvest = 'No',Oys = 400,lab = "ab",
-                       Region = factor('Matanzas River',levels = c("Matanzas River","Salt Run","Tolomato River")))
+a_oys
 
-a_oys + geom_text(data = ann_text,label = "ab")
-a_oys 
+ann_text2 = data.frame(Harvest = 'Yes', Oys = 8500, lab = "A",
+                       Region = factor('Matanzas River',levels = c("Matanzas River", "Salt Run", "Tolomato River")))
+ann_text3 = data.frame(Harvest = 'Yes', Oys = 8500, lab = "B*",
+                       Region = factor('Salt Run',levels = c("Matanzas River", "Salt Run", "Tolomato River")))
+ann_text4 = data.frame(Harvest = 'Yes', Oys = 8500, lab = "AB*",
+                       Region = factor('Tolomato River',levels = c("Matanzas River", "Salt Run", "Tolomato River")))
+
+
+a_oys2= a_oys + geom_text(data = ann_text2, label = "A", color='black', hjust = 6.50) +
+  geom_text(data = ann_text3, label = "B*", color = 'black', hjust = 4.00) +
+  geom_text(data = ann_text4, label = "AB*", color = 'black', hjust = 2.50)
+  
+a_oys2
+
 
 a_mus = data %>% 
   ggplot(aes(x = Harvest, y = Mus, color = Harvest)) + geom_violin(trim = F) +
@@ -102,14 +119,28 @@ a_mus = data %>%
                                 label = round(mean, digits = 2),
                                               family = "times new roman"), size = 3.3,
                             nudge_y = 2.5, nudge_x = 0.2, color = "black") +
-  theme_bw(base_family = "serif") +
+  theme_bw(base_family = "times new roman") +
   theme(axis.text = element_text(color = "black"),
         legend.position = "none", panel.background = element_blank(),
         plot.title = element_text(hjust = 0.5)) +
-  labs(x = "Harvest", y = bquote(Density~(Mussels/0.0625~m^2)))+ facet_wrap(~Region) +
+  labs(x = "In Harvest Zone?", y = bquote(Density~(Mussels/m^2)))+ facet_wrap(~Region) +
   theme(panel.spacing = unit(0, 'lines')) + ggtitle("Mussel Density by Region")
 
-a_mus
+ann_text7 = data.frame(Harvest = 'Yes', Mus = 30000, lab = "A",
+                       Region = factor('Matanzas River',levels = c("Matanzas River", "Salt Run", "Tolomato River")))
+ann_text8 = data.frame(Harvest = 'Yes', Mus = 30000, lab = "A*",
+                       Region = factor('Salt Run',levels = c("Matanzas River", "Salt Run", "Tolomato River")))
+ann_text9 = data.frame(Harvest = 'Yes', Mus = 30000, lab = "A",
+                       Region = factor('Tolomato River',levels = c("Matanzas River", "Salt Run", "Tolomato River")))
+
+
+a_mus2= a_mus + geom_text(data = ann_text7, label = "AB*", color='black', hjust = 2.50) +
+  geom_text(data = ann_text8, label = "A*", color = 'black', hjust =4.00) +
+  geom_text(data = ann_text9, label = "B", color = 'black', hjust = 5.50)
+
+a_mus2
+
+
 
 a_clus = data %>% 
   ggplot(aes(x = Harvest, y = Cluster, color = Harvest)) + geom_violin(trim = F) +
@@ -127,24 +158,28 @@ a_clus = data %>%
   labs(x = "Harvest", y = bquote(Density~(Clusters/m^2)))+ facet_wrap(~Region) +
   theme(panel.spacing = unit(0, 'lines')) + ggtitle("Cluster Density by Region")
 
+
+ 
+
+
 a_clus
 
-a_sh = Sh_CollectionAvg %>% 
-  ggplot(aes(x = Harvest, y = mean, color = Harvest)) + geom_violin(trim = F) +
-  geom_jitter(alpha = 0.5, width = 0.2, size = 2) +
-  geom_point(data = means_sh, aes(x = Harvest, y = mean, size = 4)) +
-  scale_color_manual(values = harvest_colors) +
-  ggrepel::geom_label_repel(data = means_sh, aes(x = Harvest, y = mean, label = round(mean, digits = 2),
-                                                   family = "times new roman"), size = 3.3,
-                            nudge_y = 2.5, nudge_x = 0.2, color = "black") +
-  theme_bw(base_family = "serif") +
-  theme(axis.text = element_text(color = "black"),
-        legend.position = "none", panel.background = element_blank(),
-        plot.title = element_text(hjust = 0.5)) +
-  labs(x = "Harvest", y = "Average Shell Height (mm)")+ facet_wrap(~Region) +
-  theme(panel.spacing = unit(0, 'lines')) + ggtitle("Average Shell Heights")
+#a_sh = Sh_CollectionAvg %>% 
+  #ggplot(aes(x = Harvest, y = mean, color = Harvest)) + geom_violin(trim = F) +
+  #geom_jitter(alpha = 0.5, width = 0.2, size = 2) +
+  #geom_point(data = means_sh, aes(x = Harvest, y = mean, size = 4)) +
+  #scale_color_manual(values = harvest_colors) +
+  #ggrepel::geom_label_repel(data = means_sh, aes(x = Harvest, y = mean, label = round(mean, digits = 2),
+                                                  # family = "times new roman"), size = 3.3,
+                           # nudge_y = 2.5, nudge_x = 0.2, color = "black") +
+  #theme_bw(base_family = "serif") +
+  #theme(axis.text = element_text(color = "black"),
+       # legend.position = "none", panel.background = element_blank(),
+       # plot.title = element_text(hjust = 0.5)) +
+  #labs(x = "Harvest", y = "Average Shell Height (mm)")+ facet_wrap(~Region) +
+  #theme(panel.spacing = unit(0, 'lines')) + ggtitle("Average Shell Heights")
 
-a_sh
+#a_sh
 
 a_cultch = cultch %>% 
   ggplot(aes(x = Harvest, y = Cultch, color = Harvest)) + geom_violin(trim = F) +
@@ -153,16 +188,27 @@ a_cultch = cultch %>%
   scale_color_manual(values = harvest_colors) +
   ggrepel::geom_label_repel(data = means_cultch, aes(x = Harvest, y = mean, 
                                                      label = round(mean, digits = 2),
-                                                 family = "serif"), size = 3.3,
+                                                 family = "times new roman"), size = 3.3,
                             nudge_y = 2.5, nudge_x = 0.2, color = "black") +
-  theme_bw(base_family = "serif") +
+  theme_bw(base_family = "times new roman") +
   theme(axis.text = element_text(color = "black"),
         legend.position = "none", plot.title = element_text(hjust = 0.5)) +
-  labs(x = "Harvest", y = "Cultch Mass (g)")+ facet_wrap(~Region) +
+  labs(x = "In Harvest Zone?", y = "Cultch Mass (g)")+ facet_wrap(~Region) +
   theme(panel.spacing = unit(0, 'lines')) + ggtitle("Cultch Mass by Region")
 
 
-a_cultch
+ann_text5 = data.frame(Harvest = 'Yes', Cultch = 20000, lab = "A",
+                       Region = factor('Matanzas River',levels = c("Matanzas River", "Salt Run")))
+ann_text6 = data.frame(Harvest = 'Yes', Cultch = 20000, lab = "A*",
+                       Region = factor('Salt Run',levels = c("Matanzas River", "Salt Run")))
+
+
+
+a_cultch2= a_cultch + geom_text(data = ann_text5, label = "A", color='black', hjust = 9.50) +
+  geom_text(data = ann_text6, label = "A*", color = 'black', hjust =6.00) 
+
+
+a_cultch2
 
 ##### SH histogram-----
 
@@ -202,10 +248,10 @@ plot(glmm_oys5)
 
 #estimated marginal means
 AIC(glmm_oys1, glmm_oys2, glmm_oys3, glmm_oys4, glmm_oys5, glmm_oys6)
-m.region <- emmeans(glmm_oys6, ~ Region)
+m.region <- emmeans(glmm_oys5, ~ Region)
 
-Anova(glmm_oys6)
-summary(glmm_oys6)
+Anova(glmm_oys5)
+summary(glmm_oys5)
 
 res <- DHARMa::simulateResiduals(glmm_oys5)
 plot(res)
@@ -271,6 +317,7 @@ testResiduals(res_cultch)
 
 performance::check_autocorrelation(glmm_cultch1)
 
+contrast(region_cultchEMM, method = 'pairwise', adjust = 'tukey')
 #cultch mass in just Salt Run
 glmm_cultch3 = lmer(Cultch ~ Harvest + (1|Reef), 
                     data = SRCultch)
@@ -316,8 +363,19 @@ summary(glmm_mus5)
 Anova(glmm_mus5)
 contrast(mus.region, method = 'pairwise', adjust='tukey')
 mus.region <- emmeans(glmm_mus5, ~ Region)
-mus.region
+mus.region 
 
+SRMus = glmer.nb(Mus ~ Harvest + (1|ReefID), data = SROys)
+SR_musEMM = emmeans(SRMus, ~Harvest)
+contrast(SR_musEMM, method = 'pairwise', adjust='tukey')
+
+TRMus = glmer.nb(Mus ~ Harvest + (1|ReefID), data = TROys)
+Trmusemm = emmeans(TRMus, ~Harvest)
+contrast(Trmusemm, method = 'pairwise', adjust='tukey')
+
+MRMus = glmer.nb(Mus ~ Harvest  + (1|ReefID), data = MROys)
+MRmusEMM = emmeans(MRMus, ~Harvest)
+contrast(MRmusEMM, method = 'pairwise', adjust='tukey')
 ##### Harvest on clusters--------
 glmm_clus1 = glmer.nb(Cluster ~ Harvest + (1| ReefID) + (1|Region), data = data) 
 glmm_clus2 = glmer.nb(Cluster ~ Harvest + (1|ReefID) + (1|Region) + (1|Sample), data = data) 

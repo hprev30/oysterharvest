@@ -151,18 +151,28 @@ a_clus = data %>%
                                                    label = round(mean, digits = 2),
                                                   family = "times new roman"), size = 3.3,
                             nudge_y = 2.5, nudge_x = 0.2, color = "black") +
-  theme_bw(base_family = "serif") +
+  theme_bw(base_family = "times new roman") +
   theme(axis.text = element_text(color = "black"),
         legend.position = "none", panel.background = element_blank(),
         plot.title = element_text(hjust = 0.5)) +
-  labs(x = "Harvest", y = bquote(Density~(Clusters/m^2)))+ facet_wrap(~Region) +
+  labs(x = "In Harvest Zone?", y = bquote(Density~(Clusters/m^2)))+ facet_wrap(~Region) +
   theme(panel.spacing = unit(0, 'lines')) + ggtitle("Cluster Density by Region")
 
+ann_text10 = data.frame(Harvest = 'Yes', Cluster = 55, lab = "A",
+                       Region = factor('Matanzas River',levels = c("Matanzas River", "Salt Run", "Tolomato River")))
+ann_text11 = data.frame(Harvest = 'Yes', Cluster = 55, lab = "B*",
+                       Region = factor('Salt Run',levels = c("Matanzas River", "Salt Run", "Tolomato River")))
+ann_text12 = data.frame(Harvest = 'Yes', Cluster = 55, lab = "A",
+                       Region = factor('Tolomato River',levels = c("Matanzas River", "Salt Run", "Tolomato River")))
 
- 
+
+a_clus2= a_clus + geom_text(data = ann_text10, label = "A", color='black', hjust = 6.00) +
+  geom_text(data = ann_text11, label = "B*", color = 'black', hjust =3.50) +
+  geom_text(data = ann_text12, label = "A", color = 'black', hjust = 6.00)
 
 
-a_clus
+
+a_clus2
 
 #a_sh = Sh_CollectionAvg %>% 
   #ggplot(aes(x = Harvest, y = mean, color = Harvest)) + geom_violin(trim = F) +
@@ -390,6 +400,17 @@ contrast(clus.region, method = 'pairwise', adjust='tukey')
 clus.region <- emmeans(glmm_clus5, ~ Region)
 clus.region
 
+SRClus =  glmer.nb(Cluster ~ Harvest + (1|ReefID), data = SROys) 
+SRClusEMM = emmeans(SRClus, ~Harvest)
+contrast(SRClusEMM, method = 'pairwise', adjust='tukey')
+
+MRClus =  glmer.nb(Cluster ~ Harvest + (1|ReefID), data = MROys) 
+MRClusEMM = emmeans(MRClus, ~Harvest)
+contrast(MRClusEMM, method = 'pairwise', adjust='tukey')
+
+TRClus =  glmer.nb(Cluster ~ Harvest + (1|ReefID), data = TROys) 
+TRClusEMM = emmeans(TRClus, ~Harvest)
+contrast(TRClusEMM, method = 'pairwise', adjust='tukey')
 
 ##### Harvest on spat------
 glmm_spat1 = glmer.nb(Spat ~ Harvest + (1| ReefID) + (1|Region), data = data) 
@@ -397,15 +418,20 @@ glmm_spat2 = glmer.nb(Spat ~ Harvest + (1|ReefID) + (1|Region) + (1|Sample), dat
 glmm_spat3 = glmer.nb(Spat ~ Harvest + (1|ReefID), data = data) 
 glmm_spat4 = glmer.nb(Spat ~ Harvest + (1|Region), data = data)
 glmm_spat5 = glmer.nb(Spat ~ Harvest * Region + (1|ReefID), data = data) 
-glmm_spat6 = glmer.nb(Spat ~ Harvest * Region * Sample + (1|ReefID), data = data)  #failed to converge
-AIC(glmm_spat1, glmm_spat2, glmm_spat3, glmm_spat4, glmm_spat5)
+glmm_spat6 = glmer.nb(Spat ~ Harvest * Region + (1|ReefID) + (1|Sample), data = data)  
+glmm_spat7 = glmer.nb(Spat ~ Harvest * Sample + (1|ReefID) + (1|Region), data = data)
+AIC(glmm_spat1, glmm_spat2, glmm_spat3, glmm_spat4, glmm_spat5, glmm_spat6, glmm_spat7)
 
 
-summary(glmm_spat2)
-Anova(glmm_spat2)
+summary(glmm_spat7)
+Anova(glmm_spat7)
 contrast(spat.region, method = 'pairwise', adjust='tukey')
-spat.region <- emmeans(glmm_spat2, ~Harvest)
-clus.region
+contrast(spat.season, method = 'pairwise', adjust='tukey')
+spat.region <- emmeans(glmm_spat7, ~Region)
+spat.season = emmeans(glmm_spat7, ~Sample)
+spat.region
+
+
 #####Checking for overdisperion-----
 #Cluster counts: var = 62.65978, mean = 13.07591, means over dispersion, meaning negative binomial distribution for clusters
 #Oys counts: var = 3889.65, mean = 89.51911, means over dispersion, meaning negative binomial distribution for clusters

@@ -60,12 +60,21 @@ data$Region = as.factor(data$Region)
 
 data$Oys = data$Oys*16 #scaling up to a meter squared
 data$Mus = data$Mus*16
+cultch$Cultch = cultch$Cultch*16
+cultch$Cultch = cultch$Cultch/100
+
 means_oys = data %>% group_by(Harvest, Region) %>%
-  summarize(mean = mean(Oys, na.rm = T))
+  summarize(mean = mean(Oys, na.rm = T)) 
+means_oys$mean = round(means_oys$mean, 0)
+
 means_mus = data %>% group_by(Harvest, Region) %>%
   summarize(mean = mean(Mus, na.rm = T))
+means_mus$mean = round(means_mus$mean, 0)
+
 means_clus = data %>% group_by(Harvest, Region) %>%
   summarize(mean = mean(Cluster, na.rm = T))
+means_clus$mean = round(means_clus$mean, 0)
+
 Sh_CollectionAvg = Sh %>% group_by(Harvest, Region, Collection)  %>%
   summarize(mean = mean(Shell, na.rm = T))
 Sh_Avg = Sh_CollectionAvg %>% group_by(Harvest, Region)  %>%
@@ -90,7 +99,7 @@ a_oys = data %>%
         legend.position = "none", panel.background = element_blank(),
                                          plot.title = element_text(hjust = 0.5)) +
   labs(x = "In Harvest Zone?", y = bquote(Density~(Oysters/m^2)))+ facet_wrap(~Region) +
-  theme(panel.spacing = unit(0, 'lines')) +  ggtitle("Oyster Density by Region") 
+  theme(panel.spacing = unit(0, 'lines')) 
 
 a_oys
 
@@ -102,9 +111,9 @@ ann_text4 = data.frame(Harvest = 'Yes', Oys = 8500, lab = "AB*",
                        Region = factor('Tolomato River',levels = c("Matanzas River", "Salt Run", "Tolomato River")))
 
 
-a_oys2= a_oys + geom_text(data = ann_text2, label = "A", color='black', hjust = 6.50) +
+a_oys2= a_oys + geom_text(data = ann_text2, label = "A", color='black', hjust = 7.50) +
   geom_text(data = ann_text3, label = "B*", color = 'black', hjust = 4.00) +
-  geom_text(data = ann_text4, label = "AB*", color = 'black', hjust = 2.50)
+  geom_text(data = ann_text4, label = "AB*", color = 'black', hjust = 3.00)
   
 a_oys2
 
@@ -124,19 +133,19 @@ a_mus = data %>%
         legend.position = "none", panel.background = element_blank(),
         plot.title = element_text(hjust = 0.5)) +
   labs(x = "In Harvest Zone?", y = bquote(Density~(Mussels/m^2)))+ facet_wrap(~Region) +
-  theme(panel.spacing = unit(0, 'lines')) + ggtitle("Mussel Density by Region")
+  theme(panel.spacing = unit(0, 'lines')) 
 
-ann_text7 = data.frame(Harvest = 'Yes', Mus = 30000, lab = "A",
+ann_text7 = data.frame(Harvest = 'Yes', Mus = 2000, lab = "A",
                        Region = factor('Matanzas River',levels = c("Matanzas River", "Salt Run", "Tolomato River")))
-ann_text8 = data.frame(Harvest = 'Yes', Mus = 30000, lab = "A*",
+ann_text8 = data.frame(Harvest = 'Yes', Mus = 2000, lab = "A*",
                        Region = factor('Salt Run',levels = c("Matanzas River", "Salt Run", "Tolomato River")))
-ann_text9 = data.frame(Harvest = 'Yes', Mus = 30000, lab = "A",
+ann_text9 = data.frame(Harvest = 'Yes', Mus = 2000, lab = "A",
                        Region = factor('Tolomato River',levels = c("Matanzas River", "Salt Run", "Tolomato River")))
 
 
-a_mus2= a_mus + geom_text(data = ann_text7, label = "AB*", color='black', hjust = 2.50) +
-  geom_text(data = ann_text8, label = "A*", color = 'black', hjust =4.00) +
-  geom_text(data = ann_text9, label = "B", color = 'black', hjust = 5.50)
+a_mus2= a_mus + geom_text(data = ann_text7, label = "AB*", color='black', hjust = 3.00) +
+  geom_text(data = ann_text8, label = "A*", color = 'black', hjust =4.50) +
+  geom_text(data = ann_text9, label = "B", color = 'black', hjust = 7.00)
 
 a_mus2
 
@@ -156,7 +165,7 @@ a_clus = data %>%
         legend.position = "none", panel.background = element_blank(),
         plot.title = element_text(hjust = 0.5)) +
   labs(x = "In Harvest Zone?", y = bquote(Density~(Clusters/m^2)))+ facet_wrap(~Region) +
-  theme(panel.spacing = unit(0, 'lines')) + ggtitle("Cluster Density by Region")
+  theme(panel.spacing = unit(0, 'lines')) 
 
 ann_text10 = data.frame(Harvest = 'Yes', Cluster = 55, lab = "A",
                        Region = factor('Matanzas River',levels = c("Matanzas River", "Salt Run", "Tolomato River")))
@@ -166,9 +175,9 @@ ann_text12 = data.frame(Harvest = 'Yes', Cluster = 55, lab = "A",
                        Region = factor('Tolomato River',levels = c("Matanzas River", "Salt Run", "Tolomato River")))
 
 
-a_clus2= a_clus + geom_text(data = ann_text10, label = "A", color='black', hjust = 6.00) +
-  geom_text(data = ann_text11, label = "B*", color = 'black', hjust =3.50) +
-  geom_text(data = ann_text12, label = "A", color = 'black', hjust = 6.00)
+a_clus2= a_clus + geom_text(data = ann_text10, label = "A", color='black', hjust = 7.50) +
+  geom_text(data = ann_text11, label = "B*", color = 'black', hjust =4.50) +
+  geom_text(data = ann_text12, label = "A", color = 'black', hjust = 7.50)
 
 
 
@@ -203,19 +212,20 @@ a_cultch = cultch %>%
   theme_bw(base_family = "times new roman") +
   theme(axis.text = element_text(color = "black"),
         legend.position = "none", plot.title = element_text(hjust = 0.5)) +
-  labs(x = "In Harvest Zone?", y = "Cultch Mass (g)")+ facet_wrap(~Region) +
-  theme(panel.spacing = unit(0, 'lines')) + ggtitle("Cultch Mass by Region")
+  labs(x = "In Harvest Zone?", y = bquote(Cultch~Mass~(kg)))+ facet_wrap(~Region) +
+  theme(panel.spacing = unit(0, 'lines'))
 
+a_cultch
 
-ann_text5 = data.frame(Harvest = 'Yes', Cultch = 20000, lab = "A",
+ann_text5 = data.frame(Harvest = 'Yes', Cultch = 3500, lab = "A",
                        Region = factor('Matanzas River',levels = c("Matanzas River", "Salt Run")))
-ann_text6 = data.frame(Harvest = 'Yes', Cultch = 20000, lab = "A*",
+ann_text6 = data.frame(Harvest = 'Yes', Cultch = 3500, lab = "A*",
                        Region = factor('Salt Run',levels = c("Matanzas River", "Salt Run")))
 
 
 
-a_cultch2= a_cultch + geom_text(data = ann_text5, label = "A", color='black', hjust = 9.50) +
-  geom_text(data = ann_text6, label = "A*", color = 'black', hjust =6.00) 
+a_cultch2= a_cultch + geom_text(data = ann_text5, label = "A", color='black', hjust = 11.0) +
+  geom_text(data = ann_text6, label = "A*", color = 'black', hjust =6.50) 
 
 
 a_cultch2
@@ -225,14 +235,16 @@ a_cultch2
 hist_sh <- Sh %>%
   ggplot(aes(x=Shell, fill=Harvest, color = Harvest)) +
   geom_histogram(alpha=0.5, position = 'identity') + 
-  scale_fill_manual(values = harvest_colors) + 
-  scale_color_manual(values = harvest_colors) +
+  scale_fill_manual(legend_title, values = harvest_colors) + 
+  scale_color_manual(legend_title, values = harvest_colors) +
   labs(x = "Shell Height (mm)", y = "Frequency") + facet_grid(Harvest ~ Region) +
   theme(panel.background = element_blank(), axis.line=element_line(size=1), 
         plot.title = element_text(hjust = 0.5)) +
-  geom_vline(xintercept = 75, linetype = "dashed") + #geom_vline(xintercept = 25, linetype = 'dashed') +
-  ggtitle("Oyster Height Frequency")
-   
+  geom_vline(xintercept = 75, linetype = "dashed")
+  #geom_vline(xintercept = 25, linetype = 'dashed') +
+  
+
+legend_title <- "In Harvest Zone?"
 
 hist_sh
 

@@ -271,9 +271,10 @@ glmm_oys3 = glmer.nb(Oys ~ Harvest + (1| ReefID) + (1|Region), data = data) #327
 glmm_oys4 = glmer.nb(Oys ~ Harvest + (1|ReefID) + (1|Region) + (1|Sample), data = data) #3276.4
 glmm_oys5 = glmer.nb(Oys ~ Harvest * Region + (1|ReefID), data = data) #3263.6
 glmm_oys6 = glmer.nb(Oys ~ Harvest * Region + (1|ReefID) + (1|Sample), data = data)
+glmm_oys7 = glmer.nb(Oys ~ Harvest * Sample + (1|ReefID) + (1|Region), data = data)
 plot(glmm_oys5)
-
-modset = list(glmm_oys0, glmm_oys1,glmm_oys2, glmm_oys3, glmm_oys4, glmm_oys5, glmm_oys6)
+Anova(glmm_oys7)
+modset = list(glmm_oys0, glmm_oys1,glmm_oys2, glmm_oys3, glmm_oys4, glmm_oys5, glmm_oys6, glmm_oys7)
 modnames2 = c("intercept", "oys ~ harvest + Reef", "oys ~ harvest + region", 
               "oys ~ harvest + reef + region", "oys~harvest + region + sample", 
               "oys ~ harvest * region + reef", "oys~harvest*region+reef+sample")
@@ -354,7 +355,7 @@ contrast(c.region, method = 'pairwise', adjust='tukey')
 hist(cultch$Cultch)
 summary(glmm_cultch1)
 summary(glmm_cultch2)
-Anova(glmm_cultch1)
+Anova(glmm_cultch4)
 AIC(glmm_cultch1, glmm_cultch2)
 AIC(glmm_cultch2)
 
@@ -415,12 +416,6 @@ modnames4 = c("intercept", "mus ~ harvest + Reef", "mus ~ harvest + region",
 names(modset_mus) <- modnames4
 
 bbmle::AICctab(modset_mus, weights = TRUE, base = T)
-
-
-
-
-
-
 
 AIC(glmm_mus3, glmm_mus4, glmm_mus5)
 summary(glmm_mus5)

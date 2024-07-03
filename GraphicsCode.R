@@ -10,9 +10,13 @@ library(emmeans)
 library(estimability)
 library(readr)
 library(ggsignif)
+library(bbmle)
+library(AICcmodavg)
 install.packages('estimability')
 install.packages('readr')
 install.packages('ggsignif')
+install.packages('bbmle')
+install.packages('AICcmodavg')
 
 ##### data----
 #reading in data
@@ -260,16 +264,27 @@ region_colors = c('Salt Run' = 'yellow3', 'Matanzas River' = 'blue', 'Tolomato R
 
 
 ##### live oyster density model fitting------
-glmm_oys1 = glmer.nb(Oys ~ Harvest + (1| ReefID) + (1|Region), data = data) #3276.2
-glmm_oys2 = glmer.nb(Oys ~ Harvest + (1|ReefID) + (1|Region) + (1|Sample), data = data) #3276.4
-glmm_oys3 = glmer.nb(Oys ~ Harvest + (1|ReefID), data = data) #3277.8
-glmm_oys4 = glmer.nb(Oys ~ Harvest + (1|Region), data = data) #3333.3
+glmm_oys0 = glmmTMB::glmmTMB(Oys ~ Harvest, data = data, family = "nbinom2")
+glmm_oys1 = glmer.nb(Oys ~ Harvest + (1|ReefID), data = data) #3277.8
+glmm_oys2 = glmer.nb(Oys ~ Harvest + (1|Region), data = data) #3333.3
+glmm_oys3 = glmer.nb(Oys ~ Harvest + (1| ReefID) + (1|Region), data = data) #3276.2
+glmm_oys4 = glmer.nb(Oys ~ Harvest + (1|ReefID) + (1|Region) + (1|Sample), data = data) #3276.4
 glmm_oys5 = glmer.nb(Oys ~ Harvest * Region + (1|ReefID), data = data) #3263.6
 glmm_oys6 = glmer.nb(Oys ~ Harvest * Region + (1|ReefID) + (1|Sample), data = data)
 plot(glmm_oys5)
 
+modset = list(glmm_oys0, glmm_oys1,glmm_oys2, glmm_oys3, glmm_oys4, glmm_oys5, glmm_oys6)
+modnames2 = c("intercept", "oys ~ harvest + Reef", "oys ~ harvest + region", 
+              "oys ~ harvest + reef + region", "oys~harvest + region + sample", 
+              "oys ~ harvest * region + reef", "oys~harvest*region+reef+sample")
+names(modset) <- modnames2
+
+bbmle::AICctab(modset, weights = TRUE, base = T)
+
+AICcmodavg::aictab(modset, modnames2, second.ord = TRUE) #model selection table with AICc
+
 #estimated marginal means
-AIC(glmm_oys1, glmm_oys2, glmm_oys3, glmm_oys4, glmm_oys5, glmm_oys6)
+AIC(glmm_oys0, glmm_oys1, glmm_oys2, glmm_oys3, glmm_oys4, glmm_oys5, glmm_oys6)
 m.region <- emmeans(glmm_oys5, ~ Region)
 
 Anova(glmm_oys5)
@@ -315,8 +330,18 @@ contrast(MRo.harvest, method = 'pairwise', adjust = 'tukey')
 summary(m.region)
 
 ##### cultch model fitting-----
-glmm_cultch1 = lmer(Cultch ~ Harvest * Region + (1|Reef), 
-                    data = cultch)
+glmm_cultch0 = glmmTMB::glmmTMB(Cultch ~ Harvest, data = cultch, family = "gaussian")
+glmm_cultch1 = lmer(Cultch ~ Harvest + (1|Reef), data = cultch) #3277.8
+glmm_cultch2 = lmer(Cultch ~ Harvest + (1|Region), data = cultch) #3333.3
+glmm_cultch3 = lmer(Cultch ~ Harvest + (1|Reef) + (1|Region), data = cultch) #3276.2
+glmm_cultch4 = lmer(Cultch ~ Harvest * Region + (1|Reef), data = cultch)
+
+modset_cultch = list(glmm_cultch0, glmm_cultch1,glmm_cultch2, glmm_cultch3, glmm_cultch4)
+modnames3 = c("intercept", "cultch ~ harvest + Reef", "cultch ~ harvest + region", 
+              "cultch ~ harvest + reef + region","oys ~ harvest * region + reef")
+names(modset_cultch) <- modnames3
+
+bbmle::AICctab(modset_cultch, weights = TRUE, base = T)
 
 gc1r = residuals(glmm_cultch1)
 shapiro.test(gc1r)
@@ -375,11 +400,28 @@ TRSH.atest = anova(TRSHNo$Shell, TRSHYes$Shell)
 TRSH.atest
 SRSH.atest = anova(SRSHNo$Shell, SRSHYes$Shell)
 ##### harvest on mussels-----
-glmm_mus1 = glmer.nb(Mus ~ Harvest + (1| ReefID) + (1|Region), data = data) 
-glmm_mus2 = glmer.nb(Mus ~ Harvest + (1|ReefID) + (1|Region) + (1|Sample), data = data) 
-glmm_mus3 = glmer.nb(Mus ~ Harvest + (1|ReefID), data = data) 
-glmm_mus4 = glmer.nb(Mus ~ Harvest + (1|Region), data = data)
+glmm_mus0 = glmmTMB::glmmTMB(Mus ~ Harvest, data = data, family = "nbinom2")
+glmm_mus1 = glmer.nb(Mus ~ Harvest + (1|ReefID), data = data) 
+glmm_mus2 = glmer.nb(Mus ~ Harvest + (1|Region), data = data)
+glmm_mus3 = glmer.nb(Mus ~ Harvest + (1|ReefID) + (1|Region), data = data) 
+glmm_mus4 = glmer.nb(Mus ~ Harvest + (1|ReefID) + (1|Region) + (1|Sample), data = data) 
 glmm_mus5 = glmer.nb(Mus ~ Harvest * Region + (1|ReefID), data = data) 
+glmm_mus6 = glmer.nb(Mus ~ Harvest * Region + (1|ReefID) + (1|Sample), data = data) 
+
+modset_mus = list(glmm_mus0, glmm_mus1, glmm_mus2, glmm_mus3, glmm_mus4, glmm_mus5, glmm_mus6)
+modnames4 = c("intercept", "mus ~ harvest + Reef", "mus ~ harvest + region", 
+              "mus ~ harvest + reef + region","mus ~ harvest + reef + region + sample", 
+              "mus ~ harvest * region + reef", "mus ~ harvest * region + reef + sample")
+names(modset_mus) <- modnames4
+
+bbmle::AICctab(modset_mus, weights = TRUE, base = T)
+
+
+
+
+
+
+
 AIC(glmm_mus3, glmm_mus4, glmm_mus5)
 summary(glmm_mus5)
 Anova(glmm_mus5)
@@ -399,11 +441,22 @@ MRMus = glmer.nb(Mus ~ Harvest  + (1|ReefID), data = MROys)
 MRmusEMM = emmeans(MRMus, ~Harvest)
 contrast(MRmusEMM, method = 'pairwise', adjust='tukey')
 ##### Harvest on clusters--------
-glmm_clus1 = glmer.nb(Cluster ~ Harvest + (1| ReefID) + (1|Region), data = data) 
-glmm_clus2 = glmer.nb(Cluster ~ Harvest + (1|ReefID) + (1|Region) + (1|Sample), data = data) 
-glmm_clus3 = glmer.nb(Cluster ~ Harvest + (1|ReefID), data = data) 
-glmm_clus4 = glmer.nb(Cluster ~ Harvest + (1|Region), data = data)
-glmm_clus5 = glmer.nb(Cluster ~ Harvest * Region + (1|ReefID), data = data) 
+glmm_clus0 = glmmTMB::glmmTMB(Cluster ~ Harvest, data = data, family = "nbinom2")
+glmm_clus1 = glmer.nb(Cluster ~ Harvest + (1|ReefID), data = data) 
+glmm_clus2 = glmer.nb(Cluster ~ Harvest + (1|Region), data = data)
+glmm_clus3 = glmer.nb(Cluster ~ Harvest + (1|ReefID) + (1|Region), data = data) 
+glmm_clus4 = glmer.nb(Cluster ~ Harvest + (1|ReefID) + (1|Region) + (1|Sample), data = data) 
+glmm_clus5 = glmer.nb(Cluster ~ Harvest*Region  + (1|ReefID), data = data) 
+glmm_clus6 = glmer.nb(Cluster ~ Harvest*Region  + (1|ReefID) + (1|Sample), data = data) 
+
+modset_clus = list(glmm_clus0, glmm_clus1, glmm_clus2, glmm_clus3, glmm_clus4, glmm_clus5, glmm_clus6)
+modnames5 = c("intercept", "clus ~ harvest + Reef", "clus ~ harvest + region", 
+              "clus ~ harvest + reef + region","clus ~ harvest + reef + region + sample", 
+              "clus ~ harvest * region + reef", "clus ~ harvest * region + reef + sample")
+names(modset_clus) <- modnames5
+
+bbmle::AICctab(modset_clus, weights = TRUE, base = T)
+
 
 AIC(glmm_clus1, glmm_clus2, glmm_clus3, glmm_clus4, glmm_clus5)
 summary(glmm_clus5)
@@ -425,18 +478,29 @@ TRClusEMM = emmeans(TRClus, ~Harvest)
 contrast(TRClusEMM, method = 'pairwise', adjust='tukey')
 
 ##### Harvest on spat------
-glmm_spat1 = glmer.nb(Spat ~ Harvest + (1| ReefID) + (1|Region), data = data) 
-glmm_spat2 = glmer.nb(Spat ~ Harvest + (1|ReefID) + (1|Region) + (1|Sample), data = data) 
-glmm_spat3 = glmer.nb(Spat ~ Harvest + (1|ReefID), data = data) 
-glmm_spat4 = glmer.nb(Spat ~ Harvest + (1|Region), data = data)
+glmm_spat0 = glmmTMB::glmmTMB(Spat ~ Harvest, data = data, family = "nbinom2")
+glmm_spat1 = glmer.nb(Spat ~ Harvest + (1|ReefID), data = data) 
+glmm_spat2 = glmer.nb(Spat ~ Harvest + (1|Region), data = data)
+glmm_spat3 = glmer.nb(Spat ~ Harvest + (1|ReefID) + (1|Region), data = data) 
+glmm_spat4 = glmer.nb(Spat ~ Harvest + (1|ReefID) + (1|Region) + (1|Sample), data = data) 
 glmm_spat5 = glmer.nb(Spat ~ Harvest * Region + (1|ReefID), data = data) 
 glmm_spat6 = glmer.nb(Spat ~ Harvest * Region + (1|ReefID) + (1|Sample), data = data)  
 glmm_spat7 = glmer.nb(Spat ~ Harvest * Sample + (1|ReefID) + (1|Region), data = data)
+
+modset_spat= list(glmm_spat0, glmm_spat1, glmm_spat2, glmm_spat3, glmm_spat4, glmm_spat5, glmm_spat6, glmm_spat7)
+modnames6 = c("m0intercept", "m1spat ~ harvest + Reef", "m2spat ~ harvest + region", 
+              "m3spat ~ harvest + reef + region","m4spat ~ harvest + reef + region + sample", 
+              "m5spat ~ harvest * region + reef", "m6spat ~ harvest * region + reef + sample",
+              "m7spat ~ harvest * season + reef + region")
+names(modset_spat) <- modnames6
+
+bbmle::AICctab(modset_spat, weights = TRUE, base = T)
 AIC(glmm_spat1, glmm_spat2, glmm_spat3, glmm_spat4, glmm_spat5, glmm_spat6, glmm_spat7)
 
 
 summary(glmm_spat7)
 Anova(glmm_spat7)
+Anova(glmm_spat6)
 contrast(spat.region, method = 'pairwise', adjust='tukey')
 contrast(spat.season, method = 'pairwise', adjust='tukey')
 spat.region <- emmeans(glmm_spat7, ~Region)

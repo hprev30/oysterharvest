@@ -135,13 +135,13 @@ a_mus = data %>%
   ggrepel::geom_label_repel(data = means_mus, 
                             aes(x = Harvest, y = mean, 
                                 label = round(mean, digits = 2),
-                                              family = "times new roman"), size = 3.3,
+                                              family = "times new roman"), size = 4.5,
                             nudge_y = 2.5, nudge_x = 0.2, color = "black") +
   theme_bw(base_family = "times new roman") +
-  theme(axis.text = element_text(color = "black"),
+  theme(axis.text = element_text(color = "black"), text = element_text(size = 16),
         legend.position = "none", panel.background = element_blank(),
         plot.title = element_text(hjust = 0.5)) +
-  labs(x = "In Harvest Zone?", y = bquote(Density~(Mussels/m^2)))+ facet_wrap(~Region) +
+  labs(x = "In Harvest Zone?", y = bquote(Live~Mussel~Density~(Mussels/m^2)))+ facet_wrap(~Region) +
   theme(panel.spacing = unit(0, 'lines')) 
 
 ann_text7 = data.frame(Harvest = 'Yes', Mus = 2000, lab = "A",
@@ -442,7 +442,14 @@ names(modset_mus) <- modnames4
 
 bbmle::AICctab(modset_mus, weights = TRUE, base = T)
 
+res_m <- DHARMa::simulateResiduals(glmm_mus4)
+plot(res)
+testResiduals(res_m)
 
+agg.resC = recalculateResiduals(res_c, group=cultch$Harvest)
+
+
+testCategorical(res_m, data$Harvest, plot = T)
 summary(glmm_mus4)
 Anova(glmm_mus4)
 

@@ -106,7 +106,7 @@ a_oys = data %>%
   theme(axis.text = element_text(color = "black"),
         legend.position = "none", panel.background = element_blank(),
                                          plot.title = element_text(hjust = 0.5)) +
-  labs(x = "In Harvest Zone?", y = bquote(Density~(Oysters/m^2))) + facet_wrap(~Region) +
+  labs(x = "In Harvest Zone?", y = bquote(Density~(Live~Oysters/m^2))) + facet_wrap(~Region) +
   theme(panel.spacing = unit(0, 'lines')) 
 
 
@@ -121,7 +121,7 @@ ann_text4 = data.frame(Harvest = 'Yes', Oys = 8500, lab = "AB*",
 
 
 a_oys2= a_oys + geom_text(data = ann_text2, label = "A", color='black', hjust = 7.50) +
-  geom_text(data = ann_text3, label = "B*", color = 'black', hjust = 4.00) +
+  geom_text(data = ann_text3, label = "B*", color = 'black', hjust = 4.50) +
   geom_text(data = ann_text4, label = "AB*", color = 'black', hjust = 3.00)
   
 a_oys2

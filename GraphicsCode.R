@@ -100,13 +100,13 @@ a_oys = data %>%
   scale_color_manual(values = harvest_colors) +
   ggrepel::geom_label_repel(data = means_oys, aes(x = Harvest, y = mean, 
                                                   label = round(mean, digits = 2),
-                                                  family = "times new roman"), size = 3.3,
+                                                  family = "times new roman"), size = 4.5,
                             nudge_y = 2.5, nudge_x = 0.2, color = "black") +
   theme_bw(base_family = "TT Times New Roman") +
-  theme(axis.text = element_text(color = "black"),
+  theme(axis.text = element_text(color = "black"), text = element_text(size = 16),
         legend.position = "none", panel.background = element_blank(),
                                          plot.title = element_text(hjust = 0.5)) +
-  labs(x = "In Harvest Zone?", y = bquote(Density~(Live~Oysters/m^2))) + facet_wrap(~Region) +
+  labs(x = "In Harvest Zone?", y = bquote(Live~Oyster~Density~(Oysters/m^2))) + facet_wrap(~Region) +
   theme(panel.spacing = unit(0, 'lines')) 
 
 

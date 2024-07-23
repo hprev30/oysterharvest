@@ -247,8 +247,8 @@ hist_sh <- Sh %>%
   scale_fill_manual(legend_title, values = harvest_colors) + 
   scale_color_manual(legend_title, values = harvest_colors) +
   labs(x = "Shell Height (mm)", y = "Frequency") + facet_grid(Harvest ~ Region) +
-  theme(panel.background = element_blank(), axis.line=element_line(size=1), 
-        plot.title = element_text(hjust = 0.5)) +
+  theme(panel.background = element_blank(), axis.line=element_line(linewidth =1), 
+        plot.title = element_text(hjust = 0.5), text = element_text(size = 16)) +
   geom_vline(xintercept = 75, linetype = "dashed")
   #geom_vline(xintercept = 25, linetype = 'dashed') +
   
@@ -300,7 +300,7 @@ res <- DHARMa::simulateResiduals(glmm_oys4)
 plot(res)
 testResiduals(res)
 
-agg.res = recalculateResiduals(res, group=data$Harvest)
+agg.res = recalculateResiduals(res_m, group=data$Harvest)
 
 
 testCategorical(res, data$Harvest, plot = T)
@@ -442,16 +442,16 @@ names(modset_mus) <- modnames4
 
 bbmle::AICctab(modset_mus, weights = TRUE, base = T)
 
-res_m <- DHARMa::simulateResiduals(glmm_mus4)
+res_m2 <- DHARMa::simulateResiduals(glmm_mus5)
 plot(res)
-testResiduals(res_m)
+testResiduals(res_m2)
 
-agg.resC = recalculateResiduals(res_c, group=cultch$Harvest)
+agg.resC = recalculateResiduals(res_m, group=data$Harvest)
 
 
 testCategorical(res_m, data$Harvest, plot = T)
-summary(glmm_mus4)
-Anova(glmm_mus4)
+summary(glmm_mus5)
+Anova(glmm_mus5)
 
 contrast(mus.region, method = 'pairwise', adjust='tukey')
 

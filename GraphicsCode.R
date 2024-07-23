@@ -12,11 +12,13 @@ library(readr)
 library(ggsignif)
 library(bbmle)
 library(AICcmodavg)
+library(moments)
 install.packages('estimability')
 install.packages('readr')
 install.packages('ggsignif')
 install.packages('bbmle')
 install.packages('AICcmodavg')
+install.packages('moments')
 
 ##### data----
 #reading in data
@@ -249,15 +251,23 @@ hist_sh <- Sh %>%
   labs(x = "Shell Height (mm)", y = "Frequency") + facet_grid(Harvest ~ Region) +
   theme(panel.background = element_blank(), axis.line=element_line(linewidth =1), 
         plot.title = element_text(hjust = 0.5), text = element_text(size = 16)) +
-  geom_vline(xintercept = 75, linetype = "dashed")
-  #geom_vline(xintercept = 25, linetype = 'dashed') +
+  geom_vline(xintercept = 75, linetype = "dashed") + scale_x_continuous(breaks = seq(0, 150, 25), lim = c(0, 150)) +
+  geom_vline(xintercept = 25, linetype = 'dashed', colour = 'blue')
   
 
 legend_title <- "In Harvest Zone?"
 
+hist(SRSHNo$Shell)
 hist_sh
 
 write.csv(Sh, "Sh.csv")
+
+skewness(SRSHNo$Shell, na.rm = T)
+skewness(SRSHYes$Shell, na.rm = T)
+skewness(TRSHYes$Shell, na.rm = T)
+skewness(TRSHNo$Shell, na.rm = T)
+skewness(MRSHYes$Shell, na.rm = T)
+skewness(MRSHNo$Shell, na.rm = T)
 
 ##### colors
 harvest_fill = c("Y" = 'blue', 'N' = "yellow3")
@@ -411,17 +421,8 @@ TRSH.test = ks.test(TRSHNo$Shell, TRSHYes$Shell)
 TRSH.test
 SRSH.test = ks.test(SRSHNo$Shell, SRSHYes$Shell)
 SRSH.test
-summary(SRSH.test)
-test = ks.test(SRSHNo$Shell, SRSHNo$Shell)
-test
-MTSH.test = ks.test(SRSHYes$Shell, TRSHYes$Shell)
-MTSH.test
 
-MRSH.atest = Anova(MRSHNo$Shell, MRSHYes$Shell)
-MRSH.atest
-TRSH.atest = anova(TRSHNo$Shell, TRSHYes$Shell)
-TRSH.atest
-SRSH.atest = anova(SRSHNo$Shell, SRSHYes$Shell)
+
 ##### harvest on mussels-----
 glmm_mus0 = glmer.nb(Mus ~ Harvest + (1|ReefID), data = data) 
 glmm_mus1 = glmer.nb(Mus ~ Harvest + (1|ReefID) + (1|Region), data = data) 

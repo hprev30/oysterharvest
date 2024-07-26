@@ -169,14 +169,15 @@ a_clus = data %>%
   scale_color_manual(values = harvest_colors) +
   ggrepel::geom_label_repel(data = means_clus, aes(x = Harvest, y = mean, 
                                                    label = round(mean, digits = 2),
-                                                  family = "times new roman"), size = 3.3,
+                                                  family = "times new roman"), size = 4.5,
                             nudge_y = 2.5, nudge_x = 0.2, color = "black") +
   theme_bw(base_family = "times new roman") +
-  theme(axis.text = element_text(color = "black"),
+  theme(axis.text = element_text(color = "black"), text = element_text(size = 16),
         legend.position = "none", panel.background = element_blank(),
         plot.title = element_text(hjust = 0.5)) +
   labs(x = "In Harvest Zone?", y = bquote(Density~(Clusters/m^2)))+ facet_wrap(~Region) +
   theme(panel.spacing = unit(0, 'lines')) 
+
 
 ann_text10 = data.frame(Harvest = 'Yes', Cluster = 55, lab = "A",
                        Region = factor('Matanzas River',levels = c("Matanzas River", "Salt Run", "Tolomato River")))
@@ -187,7 +188,7 @@ ann_text12 = data.frame(Harvest = 'Yes', Cluster = 55, lab = "A",
 
 
 a_clus2= a_clus + geom_text(data = ann_text10, label = "A", color='black', hjust = 7.50) +
-  geom_text(data = ann_text11, label = "B*", color = 'black', hjust =4.50) +
+  geom_text(data = ann_text11, label = "B*", color = 'black', hjust = 5.00) +
   geom_text(data = ann_text12, label = "A", color = 'black', hjust = 7.50)
 
 

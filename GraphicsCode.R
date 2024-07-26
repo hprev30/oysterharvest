@@ -250,9 +250,9 @@ hist_sh <- Sh %>%
   scale_color_manual(legend_title, values = harvest_colors) +
   labs(x = "Shell Height (mm)", y = "Frequency") + facet_grid(Harvest ~ Region) +
   theme(panel.background = element_blank(), axis.line=element_line(linewidth =1), 
-        plot.title = element_text(hjust = 0.5), text = element_text(size = 16)) +
-  geom_vline(xintercept = 75, linetype = "dashed") + scale_x_continuous(breaks = seq(0, 150, 25), lim = c(0, 150)) +
-  geom_vline(xintercept = 25, linetype = 'dashed', colour = 'blue')
+        plot.title = element_text(hjust = 0.5), text = element_text(size = 16)) + theme(legend.position="none") +
+  geom_vline(xintercept = 75, linetype = "longdash") + scale_x_continuous(breaks = seq(0, 150, 25), lim = c(0, 150)) +
+  geom_vline(xintercept = 25, linetype = 'dotted')
   
 
 legend_title <- "In Harvest Zone?"

@@ -59,7 +59,10 @@ MRSHYes = MRSH[which(MRSH$Harvest == 'Yes'),]
 MRSHNo = MRSH[which(MRSH$Harvest == 'No'),]
 
 
-
+SRYes = SROys[which(SROys$Harvest == 'Yes'),]
+SRNo = SROys[which(SROys$Harvest == 'No'),]
+sum(SRYes$Spat)
+sum(SRNo$Spat)
 
 #making factors
 data$Harvest = as.factor(data$Harvest)
@@ -93,6 +96,7 @@ means_sh = Sh %>% group_by(Harvest, Region) %>%
   summarize(mean = mean(Shell, na.rm = T))
 means_cultch = cultch %>% group_by(Harvest, Region) %>%
   summarize(mean = mean(Cultch, na.rm = T))
+means_cultch$mean = round(means_cultch$mean, 0)
 
 ##### visualizations-----
 a_oys = data %>% 
@@ -108,23 +112,23 @@ a_oys = data %>%
   theme(axis.text = element_text(color = "black"), text = element_text(size = 16),
         legend.position = "none", panel.background = element_blank(),
                                          plot.title = element_text(hjust = 0.5)) +
-  labs(x = "In Harvest Zone?", y = bquote(Live~Oyster~Density~(Oysters/m^2))) + facet_wrap(~Region) +
+  labs(x = "In Harvest Area?", y = bquote(Live~Oyster~Density~(Oysters/m^2))) + facet_wrap(~Region) +
   theme(panel.spacing = unit(0, 'lines')) 
 
 
 a_oys
 
-ann_text2 = data.frame(Harvest = 'Yes', Oys = 8500, lab = "A",
-                       Region = factor('Matanzas River',levels = c("Matanzas River", "Salt Run", "Tolomato River")))
-ann_text3 = data.frame(Harvest = 'Yes', Oys = 8500, lab = "B*",
+#ann_text2 = data.frame(Harvest = 'Yes', Oys = 8500, lab = "A",
+                       #Region = factor('Matanzas River',levels = c("Matanzas River", "Salt Run", "Tolomato River")))
+ann_text3 = data.frame(Harvest = 'Yes', Oys = 8500, lab = "*",
                        Region = factor('Salt Run',levels = c("Matanzas River", "Salt Run", "Tolomato River")))
-ann_text4 = data.frame(Harvest = 'Yes', Oys = 8500, lab = "AB*",
+ann_text4 = data.frame(Harvest = 'Yes', Oys = 8500, lab = "*",
                        Region = factor('Tolomato River',levels = c("Matanzas River", "Salt Run", "Tolomato River")))
 
 
-a_oys2= a_oys + geom_text(data = ann_text2, label = "A", color='black', hjust = 7.50) +
-  geom_text(data = ann_text3, label = "B*", color = 'black', hjust = 4.50) +
-  geom_text(data = ann_text4, label = "AB*", color = 'black', hjust = 3.00)
+a_oys2= a_oys + 
+  geom_text(data = ann_text3, label = "*", color = 'black', hjust = 4.00, size = 12) +
+  geom_text(data = ann_text4, label = "*", color = 'black', hjust = 4.00, size = 12)
   
 a_oys2
 
@@ -143,20 +147,20 @@ a_mus = data %>%
   theme(axis.text = element_text(color = "black"), text = element_text(size = 16),
         legend.position = "none", panel.background = element_blank(),
         plot.title = element_text(hjust = 0.5)) +
-  labs(x = "In Harvest Zone?", y = bquote(Live~Mussel~Density~(Mussels/m^2)))+ facet_wrap(~Region) +
+  labs(x = "In Harvest Area?", y = bquote(Live~Mussel~Density~(Mussels/m^2)))+ facet_wrap(~Region) +
   theme(panel.spacing = unit(0, 'lines')) 
 
-ann_text7 = data.frame(Harvest = 'Yes', Mus = 2000, lab = "A",
-                       Region = factor('Matanzas River',levels = c("Matanzas River", "Salt Run", "Tolomato River")))
-ann_text8 = data.frame(Harvest = 'Yes', Mus = 2000, lab = "A*",
+ann_text7 = data.frame(Harvest = 'Yes', Mus = 2000, lab = "*",
+                      Region = factor('Matanzas River',levels = c("Matanzas River", "Salt Run", "Tolomato River")))
+ann_text8 = data.frame(Harvest = 'Yes', Mus = 2000, lab = "*",
                        Region = factor('Salt Run',levels = c("Matanzas River", "Salt Run", "Tolomato River")))
-ann_text9 = data.frame(Harvest = 'Yes', Mus = 2000, lab = "A",
-                       Region = factor('Tolomato River',levels = c("Matanzas River", "Salt Run", "Tolomato River")))
+#ann_text9 = data.frame(Harvest = 'Yes', Mus = 2000, lab = "A",
+                      # Region = factor('Tolomato River',levels = c("Matanzas River", "Salt Run", "Tolomato River")))
 
 
-a_mus2= a_mus + geom_text(data = ann_text7, label = "AB*", color='black', hjust = 3.00) +
-  geom_text(data = ann_text8, label = "A*", color = 'black', hjust =4.50) +
-  geom_text(data = ann_text9, label = "B", color = 'black', hjust = 7.00)
+a_mus2= a_mus + geom_text(data = ann_text7, label = "*", color='black', hjust = 4.00, size = 12) +
+  geom_text(data = ann_text8, label = "*", color = 'black', hjust =4.00, size = 12) 
+  #geom_text(data = ann_text9, label = "B", color = 'black', hjust = 7.00)
 
 a_mus2
 
@@ -175,21 +179,21 @@ a_clus = data %>%
   theme(axis.text = element_text(color = "black"), text = element_text(size = 16),
         legend.position = "none", panel.background = element_blank(),
         plot.title = element_text(hjust = 0.5)) +
-  labs(x = "In Harvest Zone?", y = bquote(Density~(Clusters/m^2)))+ facet_wrap(~Region) +
+  labs(x = "In Harvest Area?", y = bquote(Cluster~Density~(Clusters/m^2)))+ facet_wrap(~Region) +
   theme(panel.spacing = unit(0, 'lines')) 
 
 
-ann_text10 = data.frame(Harvest = 'Yes', Cluster = 55, lab = "A",
-                       Region = factor('Matanzas River',levels = c("Matanzas River", "Salt Run", "Tolomato River")))
-ann_text11 = data.frame(Harvest = 'Yes', Cluster = 55, lab = "B*",
+#ann_text10 = data.frame(Harvest = 'Yes', Cluster = 55, lab = "A",
+                       #Region = factor('Matanzas River',levels = c("Matanzas River", "Salt Run", "Tolomato River")))
+ann_text11 = data.frame(Harvest = 'Yes', Cluster = 55, lab = "*",
                        Region = factor('Salt Run',levels = c("Matanzas River", "Salt Run", "Tolomato River")))
-ann_text12 = data.frame(Harvest = 'Yes', Cluster = 55, lab = "A",
-                       Region = factor('Tolomato River',levels = c("Matanzas River", "Salt Run", "Tolomato River")))
+#ann_text12 = data.frame(Harvest = 'Yes', Cluster = 55, lab = "A",
+                       #Region = factor('Tolomato River',levels = c("Matanzas River", "Salt Run", "Tolomato River")))
 
 
-a_clus2= a_clus + geom_text(data = ann_text10, label = "A", color='black', hjust = 7.50) +
-  geom_text(data = ann_text11, label = "B*", color = 'black', hjust = 5.00) +
-  geom_text(data = ann_text12, label = "A", color = 'black', hjust = 7.50)
+a_clus2= a_clus + #geom_text(data = ann_text10, label = "A", color='black', hjust = 7.50) +
+  geom_text(data = ann_text11, label = "*", color = 'black', hjust = 4.00, size = 12)
+  #geom_text(data = ann_text12, label = "A", color = 'black', hjust = 7.50)
 
 
 
@@ -219,25 +223,26 @@ a_cultch = cultch %>%
   scale_color_manual(values = harvest_colors) +
   ggrepel::geom_label_repel(data = means_cultch, aes(x = Harvest, y = mean, 
                                                      label = round(mean, digits = 2),
-                                                 family = "times new roman"), size = 3.3,
+                                                 family = "times new roman"), size = 4.5,
                             nudge_y = 2.5, nudge_x = 0.2, color = "black") +
   theme_bw(base_family = "times new roman") +
-  theme(axis.text = element_text(color = "black"),
-        legend.position = "none", plot.title = element_text(hjust = 0.5)) +
-  labs(x = "In Harvest Zone?", y = bquote(Cultch~Mass~(kg)))+ facet_wrap(~Region) +
+  theme(axis.text = element_text(color = "black"), text = element_text(size = 16),
+        legend.position = "none", panel.background = element_blank(),
+        plot.title = element_text(hjust = 0.5)) +
+  labs(x = "In Harvest Area?", y = bquote(Cultch~Mass~(kg)))+ facet_wrap(~Region) +
   theme(panel.spacing = unit(0, 'lines'))
 
 a_cultch
 
-ann_text5 = data.frame(Harvest = 'Yes', Cultch = 3500, lab = "A",
-                       Region = factor('Matanzas River',levels = c("Matanzas River", "Salt Run")))
-ann_text6 = data.frame(Harvest = 'Yes', Cultch = 3500, lab = "A*",
+#ann_text5 = data.frame(Harvest = 'Yes', Cultch = 3500, lab = "A",
+                       #Region = factor('Matanzas River',levels = c("Matanzas River", "Salt Run")))
+ann_text6 = data.frame(Harvest = 'Yes', Cultch = 3500, lab = "*",
                        Region = factor('Salt Run',levels = c("Matanzas River", "Salt Run")))
 
 
 
-a_cultch2= a_cultch + geom_text(data = ann_text5, label = "A", color='black', hjust = 11.0) +
-  geom_text(data = ann_text6, label = "A*", color = 'black', hjust =6.50) 
+a_cultch2= a_cultch + #geom_text(data = ann_text5, label = "A", color='black', hjust = 11.0) +
+  geom_text(data = ann_text6, label = "*", color = 'black', hjust =5.75, size = 12) 
 
 
 a_cultch2
